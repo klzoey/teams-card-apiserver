@@ -1,0 +1,31 @@
+# Sidecar service to merge into each media stack's docker-compose.yml.
+#
+# Build the image once on the docker host:
+#   docker build -t teams-card-apiserver:latest .
+#
+# No ports are published — the server is only reachable on the stack's
+# internal docker network. Point the stack's apps at it by service name:
+#   Radarr  ->  http://teams-cards:4545/webhook/radarr
+#   Sonarr  ->  http://teams-cards:4545/webhook/sonarr
+#   Plex    ->  http://teams-cards:4545/webhook/plex
+# (If the stack uses a named/custom network, attach teams-cards to the same
+# network the *arr containers use.)
+
+services:
+  teams-cards:
+    image: teams-card-apiserver:latest
+    container_name: teams-cards # suffix per stack if names collide, e.g. teams-cards-tv
+    restart: unless-stopped
+    environment:
+      # Fallback destination for every service in this stack:
+      TEAMS_WEBHOOK_DEFAULT: "https://prod-00.westus.logic.azure.com:443/workflows/CHANGE-ME/..."
+      # Optional per-service overrides:
+      # TEAMS_WEBHOOK_RADARR: "https://..."
+      # TEAMS_WEBHOOK_SONARR: "https://..."
+      # TEAMS_WEBHOOK_PLEX: "https://..."
+      #
+      # Once card designs are dialed in, run lean (no disk writes):
+      # CAPTURE_ENABLED: "false"
+    volumes:
+      # Only needed while CAPTURE_ENABLED is on and you want to inspect payloads:
+      - ./teams-cards/captures:/app/captures

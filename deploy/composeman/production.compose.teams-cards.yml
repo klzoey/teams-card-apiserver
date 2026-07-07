@@ -1,0 +1,24 @@
+services:
+  teams-cards:
+    container_name: !reset
+    environment:
+      - TZ=${TIMEZONE}
+      - TEAMS_WEBHOOK_DEFAULT=${TEAMS_WEBHOOK_URL}
+      - CAPTURE_ENABLED=${TEAMS_CARDS_CAPTURE:-false}
+      - FRIENDLY_NAME=${TEAMS_CARDS_FRIENDLY_NAME:-}
+      - TMDB_API_KEY=${TMDB_API_KEY:-}
+    healthcheck:
+      test: wget -qO- http://localhost:4545/health || exit 1
+    labels:
+      net.unraid.docker.icon: 'https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/microsoft-teams.png'
+      net.unraid.docker.managed: 'composeman'
+      net.unraid.docker.shell: ''
+      net.unraid.docker.webui: ''
+    ports: !reset
+    restart: unless-stopped
+    user: '99:100'
+    # To inspect captured payloads while dialing in cards: set
+    # TEAMS_CARDS_CAPTURE=true in the stack .env, create the host dir first
+    # (mkdir + chown -R 99:100), then add:
+    # volumes:
+    #   - ${APPDATA_PATH}/${COMPOSE_PROJECT_NAME}/teams-cards/captures:/app/captures

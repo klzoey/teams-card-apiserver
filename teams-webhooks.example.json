@@ -1,0 +1,7 @@
+{
+  "//": "Copy to teams-webhooks.json (gitignored) and fill in real Workflows webhook URLs. In Teams: channel > ... > Workflows > 'Post to a channel when a webhook request is received' > copy the HTTP POST URL. 'default' is the fallback for services without their own entry; env var TEAMS_WEBHOOK_<SERVICE> overrides both.",
+  "default": "https://prod-00.westus.logic.azure.com:443/workflows/CHANGE-ME/...",
+  "radarr": "https://prod-00.westus.logic.azure.com:443/workflows/CHANGE-ME/...",
+  "sonarr": "https://prod-00.westus.logic.azure.com:443/workflows/CHANGE-ME/...",
+  "plex": "https://prod-00.westus.logic.azure.com:443/workflows/CHANGE-ME/..."
+}

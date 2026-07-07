@@ -1,0 +1,12 @@
+node_modules/
+dist/
+captures/
+.env
+teams-webhooks.json
+# stack export contains live secrets (cloudflared token, etc.)
+existingdockerstack/
+# local credential scratch files
+tmdbkeys.txt
+*.log
+# live capture exports from real stacks - never commit
+teams_card_apiserver_sample/

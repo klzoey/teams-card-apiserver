@@ -1,0 +1,12 @@
+services:
+  teams-cards:
+    container_name: teams-cards
+    image: teams-card-apiserver:latest
+    ports:
+      - "4545:4545"
+    environment:
+      - TZ=Etc/UTC
+      - TEAMS_WEBHOOK_DEFAULT=<teams_workflows_webhook_url>
+      - CAPTURE_ENABLED=true
+    volumes:
+      - /<host_folder_captures>:/app/captures
