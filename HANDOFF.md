@@ -10,15 +10,19 @@ No nginx changes, no published ports, no cross-stack networking.
 
 ## One-time, per Unraid host
 
-**1. Build the image** — docker can build straight from the public repo,
-no clone needed:
+**1. Image** — nothing to build. GitHub Actions publishes
+`ghcr.io/klzoey/teams-card-apiserver:latest` on every push to main; the
+compose fragment references it and docker pulls it on first `up`.
+
+To update a stack later:
 
 ```bash
-docker build -t teams-card-apiserver:latest https://github.com/klzoey/teams-card-apiserver.git
+docker compose pull teams-cards && docker compose up -d teams-cards
+# (or the stack manager's update button)
 ```
 
-(To update later: re-run the same command — it fetches the latest main —
-then `compose up` the stack again.)
+(Building locally from the repo still works if ever needed:
+`docker build -t ghcr.io/klzoey/teams-card-apiserver:latest https://github.com/klzoey/teams-card-apiserver.git`)
 
 **2. Install the composeman templates** — copy from this repo:
 

@@ -26,12 +26,12 @@ isolated media stack, reachable only on that stack's internal docker
 network (no published ports, no nginx exposure — only outbound HTTPS to
 Teams leaves the stack).
 
-Build once on the docker host, then merge the service from
-[docker-compose.example.yml](docker-compose.example.yml) into each stack:
-
-```bash
-docker build -t teams-card-apiserver:latest .
-```
+The image is built and published by GitHub Actions on every push to main:
+`ghcr.io/klzoey/teams-card-apiserver:latest` (see
+[.github/workflows/docker.yml](.github/workflows/docker.yml)). Merge the
+service from [docker-compose.example.yml](docker-compose.example.yml) into
+each stack and docker pulls it automatically; update with
+`docker compose pull && docker compose up -d`.
 
 Inside the stack, apps reach it by service name:
 `http://teams-cards:4545/webhook/radarr` (etc.). Configuration is pure env

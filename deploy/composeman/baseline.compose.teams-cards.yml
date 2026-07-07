@@ -1,7 +1,7 @@
 services:
   teams-cards:
     container_name: teams-cards
-    image: teams-card-apiserver:latest
+    image: ghcr.io/klzoey/teams-card-apiserver:latest
     ports:
       - "4545:4545"
     environment:

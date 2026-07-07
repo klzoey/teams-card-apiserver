@@ -1,7 +1,8 @@
 # Sidecar service to merge into each media stack's docker-compose.yml.
 #
-# Build the image once on the docker host:
-#   docker build -t teams-card-apiserver:latest .
+# The image is published automatically by GitHub Actions on every push to
+# main — no local build needed. To update: docker compose pull && up -d.
+# (Building locally still works: docker build -t <tag> .)
 #
 # No ports are published — the server is only reachable on the stack's
 # internal docker network. Point the stack's apps at it by service name:
@@ -13,7 +14,7 @@
 
 services:
   teams-cards:
-    image: teams-card-apiserver:latest
+    image: ghcr.io/klzoey/teams-card-apiserver:latest
     container_name: teams-cards # suffix per stack if names collide, e.g. teams-cards-tv
     restart: unless-stopped
     environment:
