@@ -3,6 +3,7 @@ import multer from "multer";
 import { saveCapture, CaptureAttachment } from "../capture";
 import { BODY_LIMIT, CAPTURE_ENABLED } from "../config";
 import { translateAndDeliver } from "../pipeline";
+import { extractOverrides } from "../util";
 
 const router = Router();
 
@@ -84,6 +85,10 @@ router.post("/:service", upload.any(), rawBody, async (req, res) => {
   const service = String(req.params.service);
   const { body, attachments } = parseIncoming(req);
   const eventType = detectEventType(body);
+  const overrides = extractOverrides(
+    req.headers as Record<string, unknown>,
+    req.query as Record<string, unknown>
+  );
 
   let capturedFile: string | undefined;
   let captureError: string | undefined;
@@ -96,6 +101,7 @@ router.post("/:service", upload.any(), rawBody, async (req, res) => {
         eventType,
         contentType: req.get("content-type"),
         headers: req.headers as Record<string, unknown>,
+        query: req.query as Record<string, unknown>,
         body,
         attachments,
       });
@@ -114,7 +120,13 @@ router.post("/:service", upload.any(), rawBody, async (req, res) => {
     console.log(`[${service}] ${eventType} (capture disabled)`);
   }
 
-  const pipeline = await translateAndDeliver(service, eventType, body, capturedFile);
+  const pipeline = await translateAndDeliver(
+    service,
+    eventType,
+    body,
+    capturedFile,
+    overrides
+  );
   if (pipeline.delivery.attempted) {
     console.log(
       pipeline.delivery.delivered

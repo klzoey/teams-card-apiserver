@@ -66,7 +66,7 @@ export const sonarrTranslator: Translator = async (body, ctx) => {
     links.push({ title: "IMDb", url: `https://www.imdb.com/title/${series.imdbId}/` });
   if (p.applicationUrl) links.push({ title: "Open Sonarr", url: p.applicationUrl });
 
-  const dest = friendlyName();
+  const dest = ctx.friendlyName ?? friendlyName();
 
   const mediaCard = (subtitle: string, color: CardColor, text?: string) =>
     buildCard({

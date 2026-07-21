@@ -2,13 +2,15 @@ import express from "express";
 import webhooksRouter from "./routes/webhooks";
 import { listCaptures, readCapture } from "./capture";
 import { getTranslator } from "./translators";
-import { getTeamsWebhookUrl } from "./teams/routing";
-import { deliverCard } from "./teams/deliver";
+import { translateAndDeliver, buildTranslatorContext } from "./pipeline";
+import { extractOverrides } from "./util";
 
 interface CaptureRecord {
   service: string;
   eventType: string;
   body: unknown;
+  headers?: Record<string, unknown>;
+  query?: Record<string, unknown>;
 }
 
 export function createApp() {
@@ -63,10 +65,14 @@ export function createApp() {
       res.status(404).json({ ok: false, error: "capture not found" });
       return;
     }
-    const card = await getTranslator(rec.service)(rec.body, {
-      service: rec.service,
-      eventType: rec.eventType,
-    });
+    const card = await getTranslator(rec.service)(
+      rec.body,
+      buildTranslatorContext(
+        rec.service,
+        rec.eventType,
+        extractOverrides(rec.headers, rec.query)
+      )
+    );
     if (!card) {
       res.json({ ok: false, error: "translator produced no card for this event" });
       return;
@@ -83,26 +89,21 @@ export function createApp() {
       res.status(404).json({ ok: false, error: "capture not found" });
       return;
     }
-    const card = await getTranslator(rec.service)(rec.body, {
-      service: rec.service,
-      eventType: rec.eventType,
-    });
-    if (!card) {
+    const result = await translateAndDeliver(
+      rec.service,
+      rec.eventType,
+      rec.body,
+      undefined,
+      extractOverrides(rec.headers, rec.query)
+    );
+    if (!result.card) {
       res.json({ ok: false, error: "translator produced no card for this event" });
       return;
     }
-    const url = getTeamsWebhookUrl(rec.service);
-    if (!url) {
-      res.status(400).json({
-        ok: false,
-        error: `no Teams webhook configured for '${rec.service}'`,
-      });
-      return;
-    }
-    const delivery = await deliverCard(url, card);
-    res.status(delivery.attempted && delivery.delivered ? 200 : 502).json({
-      ok: delivery.attempted && delivery.delivered,
-      delivery,
+    const ok = result.delivery.attempted && result.delivery.delivered;
+    res.status(ok ? 200 : result.delivery.attempted ? 502 : 400).json({
+      ok,
+      delivery: result.delivery,
     });
   });
 

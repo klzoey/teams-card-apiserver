@@ -3,6 +3,8 @@ import { AdaptiveCard } from "../teams/card";
 export interface TranslatorContext {
   service: string;
   eventType: string;
+  /** Per-request friendly name override (shared multi-user instances). */
+  friendlyName?: string;
 }
 
 /**

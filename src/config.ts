@@ -34,6 +34,14 @@ export function friendlyName(fallback?: string): string | undefined {
 }
 
 /**
+ * Per-destination friendly name for shared instances:
+ * ?dest=djuna → FRIENDLY_NAME_DJUNA.
+ */
+export function friendlyNameForKey(key: string): string | undefined {
+  return process.env[`FRIENDLY_NAME_${key.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`];
+}
+
+/**
  * Optional TMDB API key (v3 key or v4 read token) for card enrichment:
  * trailer links, runtime, genre fallback. Free at themoviedb.org.
  */

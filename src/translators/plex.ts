@@ -50,7 +50,7 @@ export const plexTranslator: Translator = (body, ctx) => {
 
   const isMediaEvent = event.startsWith("media.") || event.startsWith("playback.");
   const media = mediaLabel(md);
-  const dest = friendlyName(server.title);
+  const dest = ctx.friendlyName ?? friendlyName(server.title);
   const durationMin =
     typeof md.duration === "number" && md.duration > 0
       ? Math.round(md.duration / 60000)

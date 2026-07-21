@@ -2,7 +2,25 @@ import { AdaptiveCard } from "./teams/card";
 import { deliverCard, DeliveryResult } from "./teams/deliver";
 import { getTeamsWebhookUrl } from "./teams/routing";
 import { getTranslator } from "./translators";
+import { TranslatorContext } from "./translators/types";
 import { saveCardJson } from "./capture";
+import { friendlyNameForKey } from "./config";
+import { RequestOverrides } from "./util";
+
+/** Translator context honoring per-request overrides (shared instances). */
+export function buildTranslatorContext(
+  service: string,
+  eventType: string,
+  overrides?: RequestOverrides
+): TranslatorContext {
+  return {
+    service,
+    eventType,
+    friendlyName:
+      overrides?.friendlyName ??
+      (overrides?.destKey ? friendlyNameForKey(overrides.destKey) : undefined),
+  };
+}
 
 export interface PipelineResult {
   card: AdaptiveCard | null;
@@ -20,11 +38,15 @@ export async function translateAndDeliver(
   service: string,
   eventType: string,
   body: unknown,
-  captureFile?: string
+  captureFile?: string,
+  overrides?: RequestOverrides
 ): Promise<PipelineResult> {
   let card: AdaptiveCard | null = null;
   try {
-    card = await getTranslator(service)(body, { service, eventType });
+    card = await getTranslator(service)(
+      body,
+      buildTranslatorContext(service, eventType, overrides)
+    );
   } catch (err) {
     return {
       card: null,
@@ -48,7 +70,9 @@ export async function translateAndDeliver(
     }
   }
 
-  const webhookUrl = getTeamsWebhookUrl(service);
+  // ?dest=<key> routes to that key's webhook instead of the service's
+  const routeKey = overrides?.destKey ?? service;
+  const webhookUrl = getTeamsWebhookUrl(routeKey);
   if (!webhookUrl) {
     return {
       card,
@@ -56,8 +80,8 @@ export async function translateAndDeliver(
       delivery: {
         attempted: false,
         reason:
-          `no Teams webhook configured for '${service}' — add it to ` +
-          `teams-webhooks.json or set TEAMS_WEBHOOK_${service.toUpperCase()}`,
+          `no Teams webhook configured for '${routeKey}' — add it to ` +
+          `teams-webhooks.json or set TEAMS_WEBHOOK_${routeKey.toUpperCase()}`,
       },
     };
   }

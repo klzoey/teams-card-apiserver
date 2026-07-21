@@ -42,7 +42,7 @@ export const radarrTranslator: Translator = async (body, ctx) => {
     links.push({ title: "IMDb", url: `https://www.imdb.com/title/${movie.imdbId}/` });
   if (p.applicationUrl) links.push({ title: "Open Radarr", url: p.applicationUrl });
 
-  const dest = friendlyName();
+  const dest = ctx.friendlyName ?? friendlyName();
 
   // Title = movie name, subtitle = event message, poster + overview + facts.
   const mediaCard = (subtitle: string, color: CardColor) =>

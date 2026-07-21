@@ -79,6 +79,39 @@ that stack's Teams channel within a couple of seconds.
 | `TMDB_API_KEY` | — | Optional; enables ▶ Trailer button, runtime, and genre fallback on movie/series cards. Free key: themoviedb.org → Settings → API (v3 key or v4 read token both work) |
 | `PORT` | `4545` | Listen port |
 
+## One shared instance for multiple people (optional)
+
+Instead of a sidecar per stack, a single container can serve everyone.
+Per-request values pick the destination and the name shown on cards:
+
+- **`?dest=<key>`** on the webhook URL (or header `X-Teams-Webhook-Key`)
+  routes to that key's Teams webhook: env `TEAMS_WEBHOOK_<KEY>` (falls back
+  to `TEAMS_WEBHOOK_DEFAULT`). Also picks up `FRIENDLY_NAME_<KEY>` for the
+  card subtitle.
+- **`?friendlyName=<name>`** (or header `X-Friendly-Name`) overrides the
+  displayed name directly.
+
+Example shared-instance env:
+
+```
+TEAMS_WEBHOOK_DJUNA="https://...djuna's channel workflow..."
+FRIENDLY_NAME_DJUNA="Djuna's Plex Server"
+TEAMS_WEBHOOK_KARI="https://...kari's channel workflow..."
+FRIENDLY_NAME_KARI="Kari's Plex Server"
+```
+
+Then each app points at the shared host with its key — works for
+Radarr/Sonarr **and Plex** (no custom headers needed):
+
+```
+http://<shared-host>:4545/webhook/radarr?dest=djuna
+http://<shared-host>:4545/webhook/plex?dest=kari
+```
+
+Query params beat env for shared instances; the env vars
+(`FRIENDLY_NAME`, `TEAMS_WEBHOOK_DEFAULT`) remain the per-stack sidecar
+configuration and the fallback when no override is sent.
+
 ## Replaying captures (troubleshooting / card design)
 
 Any previously captured webhook can be re-run through translation and

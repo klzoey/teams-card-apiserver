@@ -14,6 +14,8 @@ export interface CaptureInput {
   eventType: string;
   contentType?: string;
   headers: Record<string, unknown>;
+  /** Query params of the webhook URL (?dest=, ?friendlyName=, ...). */
+  query?: Record<string, unknown>;
   body: unknown;
   attachments?: CaptureAttachment[];
 }
@@ -62,6 +64,7 @@ export async function saveCapture(input: CaptureInput): Promise<CaptureResult> {
     eventType: input.eventType,
     contentType: input.contentType ?? null,
     headers: input.headers,
+    query: input.query && Object.keys(input.query).length ? input.query : undefined,
     attachments,
     body: input.body,
   };

@@ -83,6 +83,7 @@ be published through nginx.
 | `CAPTURE_DIR` | `./captures` | Capture location |
 | `FRIENDLY_NAME` | — | Destination name in card subtitles ("Movie added to {name}") |
 | `SHOW_FRIENDLY_NAME` | `true` | Set `false` to suppress the friendly name |
+| `FRIENDLY_NAME_<KEY>` | — | Per-destination name for shared instances (used with `?dest=<key>`) |
 | `TMDB_API_KEY` | — | Optional TMDB key: adds trailer button, runtime, genre fallback |
 | `TEAMS_WEBHOOK_<SERVICE>` | — | Teams webhook URL for one service (e.g. `TEAMS_WEBHOOK_RADARR`) |
 | `TEAMS_WEBHOOK_DEFAULT` | — | Fallback Teams webhook URL |
@@ -129,6 +130,12 @@ Use this PC's LAN IP (or `localhost` if the service runs on the same box).
 
 Any other service can post to `/webhook/<name>` and will be captured the same
 way — no code changes needed.
+
+**Shared multi-user instance:** append `?dest=<key>` to a webhook URL (or
+send header `X-Teams-Webhook-Key`) to route that request to
+`TEAMS_WEBHOOK_<KEY>` and label cards with `FRIENDLY_NAME_<KEY>`;
+`?friendlyName=` / `X-Friendly-Name` overrides the label directly. See
+HANDOFF.md for a worked example.
 
 ## Teams delivery setup
 
